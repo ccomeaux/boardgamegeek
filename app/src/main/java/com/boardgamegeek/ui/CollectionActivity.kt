@@ -22,6 +22,7 @@ import com.boardgamegeek.ui.viewmodel.CollectionViewViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
+import timber.log.Timber
 
 class CollectionActivity : TopLevelSinglePaneActivity() {
     private var viewId: Long = 0
@@ -62,6 +63,7 @@ class CollectionActivity : TopLevelSinglePaneActivity() {
             firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST) {
                 param(FirebaseAnalytics.Param.CONTENT_TYPE, "Collection")
             }
+            Timber.i("Select view ?? from UI init")
             selectView(
                 if (hideNavigation) CollectionView.DEFAULT_DEFAULT_ID else intent.getLongExtra(KEY_VIEW_ID, viewModel.defaultViewId),
                 !hideNavigation
@@ -80,10 +82,12 @@ class CollectionActivity : TopLevelSinglePaneActivity() {
         findViewById<AppCompatSpinner>(R.id.menu_spinner)?.let {
             it.onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    Timber.i("Select view $id from UI menu")
                     selectView(id)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) { // Do nothing
+                    Timber.i("Nothing selected from UI menu")
                 }
             }
             it.adapter = adapter
@@ -99,6 +103,7 @@ class CollectionActivity : TopLevelSinglePaneActivity() {
     }
 
     private fun selectView(id: Long, logEvent: Boolean = true) {
+        Timber.i("Select view $id from UI")
         viewModel.selectView(id)
         if (logEvent) {
             firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {

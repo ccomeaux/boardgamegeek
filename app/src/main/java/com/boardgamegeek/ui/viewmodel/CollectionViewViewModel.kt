@@ -24,6 +24,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class CollectionViewViewModel(application: Application) : AndroidViewModel(application) {
@@ -61,11 +62,32 @@ class CollectionViewViewModel(application: Application) : AndroidViewModel(appli
         liveData {
             try {
                 emit(itemRepository.load())
+            } catch (e: Exception) {
+                _errorMessage.postValue(Event("ERROR loading the first time"))
+            } finally {
+                _isRefreshing.postValue(false)
+            }
+
+            try {
                 _isRefreshing.postValue(true)
+            } catch (e: Exception) {
+                _errorMessage.postValue(Event("ERROR setting refresh status"))
+            } finally {
+                _isRefreshing.postValue(false)
+            }
+
+            try {
                 itemRepository.refresh()
+            } catch (e: Exception) {
+                _errorMessage.postValue(Event("ERROR refreshing"))
+            } finally {
+                _isRefreshing.postValue(false)
+            }
+
+            try {
                 emit(itemRepository.load())
             } catch (e: Exception) {
-                _errorMessage.postValue(Event(e.localizedMessage.ifEmpty { "Error loading collection" }))
+                _errorMessage.postValue(Event(e.message ?: "ERROR of some kind"))
             } finally {
                 _isRefreshing.postValue(false)
             }
@@ -89,11 +111,12 @@ class CollectionViewViewModel(application: Application) : AndroidViewModel(appli
         get() = _selectedViewId
 
     val views: LiveData<List<CollectionViewEntity>> = viewsTimestamp.switchMap {
-        liveData { emit(viewRepository.load()) }
+        liveData { emit(viewRepository.load()) }.distinctUntilChanged()
     }
 
     private val selectedView: LiveData<CollectionViewEntity> = _selectedViewId.switchMap {
         liveData {
+            Timber.i("Switching to view $it")
             _sortType.value = CollectionSorterFactory.TYPE_UNKNOWN
             _addedFilters.value = emptyList()
             _removedFilterTypes.value = emptyList()
@@ -108,6 +131,7 @@ class CollectionViewViewModel(application: Application) : AndroidViewModel(appli
     init {
         refreshViews()
         viewModelScope.launch { initMediators() }
+        Timber.i("INIT")
         _selectedViewId.value = defaultViewId
     }
 
@@ -154,6 +178,7 @@ class CollectionViewViewModel(application: Application) : AndroidViewModel(appli
 
     fun selectView(viewId: Long) {
         if (_selectedViewId.value != viewId) {
+            Timber.i("Selecting $viewId")
             _isFiltering.postValue(true)
             viewModelScope.launch { viewRepository.updateShortcuts(viewId) }
             _selectedViewId.value = viewId
@@ -306,9 +331,11 @@ class CollectionViewViewModel(application: Application) : AndroidViewModel(appli
                 filters = effectiveFilters.value?.map { CollectionViewFilterEntity(it.type, it.deflate()) },
             )
             val viewId = viewRepository.insertView(view)
+            Timber.w("VIEW ID: $viewId")
             refreshViews()
             setOrRemoveDefault(viewId, isDefault)
-            selectView(viewId)
+            Timber.i("Select view $viewId after inserting")
+            selectView(viewId) // This didn't work (it went back to -1)
         }
     }
 
@@ -331,6 +358,7 @@ class CollectionViewViewModel(application: Application) : AndroidViewModel(appli
             viewRepository.deleteView(viewId)
             refreshViews()
             if (viewId == _selectedViewId.value) {
+                Timber.i("Select view $viewId after deleting")
                 selectView(defaultViewId)
             }
         }
