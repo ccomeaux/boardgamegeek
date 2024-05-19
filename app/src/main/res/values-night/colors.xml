@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="dark_blue">#ff292e62</color>
+	<color name="medium_blue">#ff405898</color>
+	<color name="light_blue">#ff5C6BC0</color>
+	<color name="orange">#ffff7807</color>
+	<color name="light_blue_transparent">#aae7ecf1</color>
+
+	<color name="primary">@color/dark_blue</color>
+	<color name="primary_dark">#ff232753</color>
+	<color name="accent">@color/orange</color>
+	<color name="info_background">@color/light_blue</color>
+
+	<color name="dialog_text">#000</color>
+	<color name="primary_text">#de000000</color>
+	<color name="secondary_text">#99000000</color>
+	<color name="disabled_text">#61000000</color>
+	<color name="inverse_text">#ffffff</color>
+	<color name="inverse_secondary_text">#b3ffffff</color>
+
+	<color name="black_overlay">#CC000000</color>
+	<color name="black_overlay_light">#6000</color>
+	<color name="no_image">#808080</color>
+	<color name="empty_tint">#aaaaaa</color>
+
+	<color name="best">#00a550</color>
+	<color name="recommended">#ffef00</color>
+	<color name="no_votes">#888888</color>
+	<color name="not_recommended">#ed1C24</color>
+
+	<color name="list_divider">#1F000000</color>
+	<color name="button_under_text">#2000</color>
+
+	<color name="score_low">#f00</color>
+	<color name="score_average">#cc0</color>
+	<color name="score_average_win">#00f</color>
+	<color name="score_high">#080</color>
+
+	<color name="delete">#f00</color>
+	<color name="edit">#080</color>
+
+	<color name="fast_scroll_track">#eee</color>
+</resources>
